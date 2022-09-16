@@ -1,0 +1,40 @@
+import {Schema, model} from 'mongoose'
+
+const authSchema = new Schema({
+    auth: {type: Number, default: 0, trim: true},
+    email: {type: String, required: true, trim: true},
+    password: {type: String, required: true, trim: true},
+    profile: {
+        firstName: {type: String, required: true, trim: true},
+        lastName: {type: String, required: true, trim: true},
+        words: {
+            a: [],
+            b: [],
+            c: [],
+            d: [],
+            e: [],
+            f: [],
+            g: [],
+            i: [],
+            j: [],
+            k: [],
+            l: [],
+            m: [],
+            n: [],
+            o: [],
+            p: [],
+            q: [],
+            r: [],
+            s: [],
+            t: [],
+            u: [],
+            v: [],
+            w: [],
+            x: [],
+            y: [],
+            z: [],
+            total: 0,
+        },
+    },
+})
+export const authModel = model('accounts', authSchema)

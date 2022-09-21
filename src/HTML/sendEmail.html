@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container {
+            width: 400px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            font-weight: 800;
+            height: 300px;
+            background: linear-gradient(to right, #262B37, #4D4450);
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 30px;
+            margin-top: 20px;
+            color: #0370e5;
+        }
+        button{
+            text-align: center;
+            background: linear-gradient(90deg, rgb(79, 104, 176) 10%, rgb(156, 62, 224) 72%);
+            font-weight: 900;
+            min-width: 100px;
+            font-size: 22px;
+            color: white;
+            height: 80px;
+            border-radius: 90px;
+            border: solid 1px black;
+            cursor: pointer;
+            width: 40%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        a{cursor: pointer}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>YourVocabulary</h1>
+    <h3>Welcome to {{username}}!</h3>
+    <p>I am very glad to see your registration in this application, I hope it will be useful for you! The last step
+        remains,
+        confirm your email otherwise it will be deleted.</p>
+    <a href="http://localhost:3000/auth/confirmed/{{verify}}"><button>Accept</button></a>
+<!--    <a href=`${}`><button>Accept</button></a>-->
+</div>
+</body>
+</html>

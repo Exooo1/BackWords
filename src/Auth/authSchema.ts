@@ -1,6 +1,7 @@
 import {Schema, model} from 'mongoose'
 
 const authSchema = new Schema({
+    verify: {type: Number, default: 0, trim: true},
     auth: {type: Number, default: 0, trim: true},
     email: {type: String, required: true, trim: true},
     password: {type: String, required: true, trim: true},

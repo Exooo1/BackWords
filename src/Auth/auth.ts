@@ -22,6 +22,7 @@ auth.post('/auth/registration', async (req: Request, res: Response) => {
             email,
             password: hashPassword,
             profile: {firstName, lastName},
+            created: new Date().toLocaleString()
         })
         await person.save()
         res.json(status(1, '', `${person._id}`))
@@ -40,7 +41,7 @@ auth.post('/auth/login', async (req: Request, res: Response) => {
         const token = jwt.sign({_id: person._id}, secretJWT, {expiresIn: '15d'})
         if (!person.verify) return res.status(400).json(status(0, 'Confirm your Email'))
         await authModel.updateOne({email}, {auth: 1})
-        res.json({token: token, auth:1})
+        res.json({token: token, auth: 1})
     } catch (err) {
         res.status(500).json(status(0, 'Server does not work!'))
     }
@@ -95,4 +96,12 @@ auth.post('/auth/me', async (req: Request & userIType, res: Response) => {
     console.log(account)
     // @ts-ignore
     res.json(status(account.auth, ''))
+})
+auth.put('/auth/logout', async (req: Request & userIType, res: Response) => {
+    const id = req.userId
+    try {
+        await authModel.updateOne({_id: id}, {auth: 0})
+    } catch (err) {
+    }
+    res.status(200).json(status(0, '', 'change auth!'))
 })

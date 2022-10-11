@@ -7,6 +7,7 @@ import {secretJWT, userIType} from '../config'
 import {AccountType, PersonType, status} from './tools'
 import nodemailer from 'nodemailer'
 import {createHandlebars} from "../HTML/config";
+import mongoose from "mongoose";
 
 export const auth = Route()
 export const authToken = Route()
@@ -104,4 +105,23 @@ auth.put('/auth/logout', async (req: Request & userIType, res: Response) => {
     } catch (err) {
     }
     res.status(200).json(status(0, '', 'change auth!'))
+})
+
+auth.get('/words', async (req: Request & userIType, res: Response) => {
+    const id = req.userId
+    const profile = await authModel.findOne({_id: id}) as PersonType
+    if (!profile) return res.status(404).json(status(0, 'bro its BAD!!!!!'))
+    res.status(200).json(status(profile.profile, '', 'okay all'))
+})
+
+auth.post('/add-word', async (req: Request & userIType, res: Response) => {
+    const id = req.userId
+    const {word} =req.body
+    const date = new Date()
+    const result = `${date.toDateString()} (${date.toTimeString().split(' ')[0]})`
+    const words = await authModel.findOne({_id: id}) as PersonType
+    words.profile.words[word[0].toLowerCase()].unshift({...req.body,added:result,_id:new mongoose.Types.ObjectId()})
+    // @ts-ignore
+    await words.save()
+    res.json('Okay')
 })

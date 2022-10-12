@@ -3,14 +3,12 @@ import {NextFunction, Request, Response} from 'express/ts4.0'
 import bcrypt from 'bcrypt'
 import jsonToken from 'jsonwebtoken'
 import {authModel} from './authSchema'
-import {secretJWT, userIType} from '../config'
+import {secretJWT, userIType} from '../configIndex'
 import {AccountType, PersonType, status} from './tools'
 import nodemailer from 'nodemailer'
-import {createHandlebars} from "../HTML/config";
-import mongoose from "mongoose";
+import {createHandlebars} from "../HTML/configSendEmail";
 
 export const auth = Route()
-export const authToken = Route()
 const jwt = jsonToken
 
 auth.post('/auth/registration', async (req: Request, res: Response) => {
@@ -91,11 +89,8 @@ auth.use((req: Request & userIType, res: Response, next: NextFunction) => {
 })
 auth.post('/auth/me', async (req: Request & userIType, res: Response) => {
     const id = req.userId
-    console.log(id, "IDDDDD")
     const account = await authModel.findOne({_id: id})
     if (!account) return res.status(404).json(status(0, 'NotFound'))
-    console.log(account)
-    // @ts-ignore
     res.json(status(account.auth, ''))
 })
 auth.put('/auth/logout', async (req: Request & userIType, res: Response) => {
@@ -107,21 +102,3 @@ auth.put('/auth/logout', async (req: Request & userIType, res: Response) => {
     res.status(200).json(status(0, '', 'change auth!'))
 })
 
-auth.get('/words', async (req: Request & userIType, res: Response) => {
-    const id = req.userId
-    const profile = await authModel.findOne({_id: id}) as PersonType
-    if (!profile) return res.status(404).json(status(0, 'bro its BAD!!!!!'))
-    res.status(200).json(status(profile.profile, '', 'okay all'))
-})
-
-auth.post('/add-word', async (req: Request & userIType, res: Response) => {
-    const id = req.userId
-    const {word} =req.body
-    const date = new Date()
-    const result = `${date.toDateString()} (${date.toTimeString().split(' ')[0]})`
-    const words = await authModel.findOne({_id: id}) as PersonType
-    words.profile.words[word[0].toLowerCase()].unshift({...req.body,added:result,_id:new mongoose.Types.ObjectId()})
-    // @ts-ignore
-    await words.save()
-    res.json('Okay')
-})

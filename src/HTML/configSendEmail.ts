@@ -1,12 +1,9 @@
 import path from "path";
 import handlebars from "handlebars";
 import fs from "fs";
+import {SendEmailType} from "./typesEmail";
 
-type ValueHandle = {
-    username: string
-    verify:string
-}
-export const createHandlebars = (value: ValueHandle) => {
+export const createHandlebars = (value: SendEmailType) => {
     const filePath = path.join(__dirname, './sendEmail.html')
     const source = fs.readFileSync(filePath, 'utf-8').toString();
     const template = handlebars.compile(source);

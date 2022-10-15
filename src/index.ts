@@ -22,4 +22,4 @@ const start = async () => {
         throw new Error("Server don't work..." + err)
     }
 }
-start()
+ start()

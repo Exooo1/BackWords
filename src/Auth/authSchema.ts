@@ -1,11 +1,10 @@
 import {Schema, model} from 'mongoose'
 
 const wordScheme = new Schema({
-    _id:{type:String,trim:true},
     word: {type: String, trim: true},
     translate: {type: String, trim: true},
     description: {type: String, trim: true},
-    added:{type: String, trim: true},
+    added: {type: String, trim: true},
 })
 
 const authSchema = new Schema({
@@ -25,6 +24,7 @@ const authSchema = new Schema({
             e: [wordScheme],
             f: [wordScheme],
             g: [wordScheme],
+            h: [wordScheme],
             i: [wordScheme],
             j: [wordScheme],
             k: [wordScheme],
@@ -44,7 +44,7 @@ const authSchema = new Schema({
             y: [wordScheme],
             z: [wordScheme],
         },
-        totalWords:{type:Number,trim:true,default:0}
+        totalWords: {type: Number, trim: true, default: 0},
     },
 })
 export const authModel = model('accounts', authSchema)

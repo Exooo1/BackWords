@@ -1,4 +1,4 @@
 export type SendEmailType = {
-    username: string
-    verify:string
+  username: string
+  verify: string
 }

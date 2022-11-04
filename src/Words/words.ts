@@ -20,10 +20,9 @@ words.get(
     req: ReqQueryType<{ count: number }> & userIType,
     res: Response<StatusType<ProfileAccountType>>,
   ) => {
-    const { count } = req.query
     try {
+      const { count } = req.query
       const profile = (await authModel.findOne({ _id: req.userId })) as AccountType
-      console.log(profile)
       if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
       let array: Array<WordType> = []
       const values = Object.values(profile.profile.words) as Array<Array<WordType>>
@@ -33,11 +32,10 @@ words.get(
         }
       }
       const resultWords = []
-      for (let i = (count - 1) * 12; i < count * 12; i++) {
+      for (let i = (count - 1) * 15; i < count * 15; i++) {
         if (array[i]) resultWords.push(array[i])
         else break
       }
-      console.log(array)
       res
         .status(200)
         .json(status<ProfileAccountType>({ ...profile.profile, words: resultWords }, 1, '', 'Done'))
@@ -50,8 +48,8 @@ words.get(
 words.post(
   '/add-word',
   async (req: ReqBodyType<{ word: string }> & userIType, res: Response<StatusType<string>>) => {
-    const { word } = req.body
     try {
+      const { word } = req.body
       const words = (await authModel.findOne({ _id: req.userId })) as AccountType
       const repeat = words.profile.words[word[0].toLowerCase()].filter((item) => item.word === word)
       if (repeat.length)
@@ -82,8 +80,8 @@ words.delete(
     req: ReqQueryType<{ id: string; letter: string }> & userIType,
     res: Response<StatusType<null>>,
   ) => {
-    const { id, letter } = req.query
     try {
+      const { id, letter } = req.query
       const person = (await authModel.findOne({ _id: req.userId })) as AccountType
       person.profile.words[letter].pull({ _id: id })
       person.profile.totalWords -= 1
@@ -101,8 +99,8 @@ words.post(
       userIType,
     res: Response<StatusType<null>>,
   ) => {
-    const { word, translate, description, id } = req.body
     try {
+      const { word, translate, description, id } = req.body
       let person = (await authModel.findOne({ _id: req.userId })) as AccountType
       const result = person.profile.words[word[0].toLowerCase()].findIndex((item) => item._id == id)
       person.profile.words[word[0].toLowerCase()][result].word = word
@@ -115,3 +113,23 @@ words.post(
     }
   },
 )
+
+words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType, res) => {
+  try {
+    const profile = (await authModel.findOne({ _id: req.userId })) as AccountType
+    if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
+    let array: Array<WordType> = []
+    const values = Object.values(profile.profile.words) as Array<Array<WordType>>
+    for (let i = 0; i < values.length; i++) {
+      if (values[i].length > 0) {
+        array = [...array, ...values[i]]
+      }
+    }
+    const filterWords = array.filter((item) =>
+      item.word.includes(req.query.word[0].toUpperCase() + req.query.word.slice(1)),
+    )
+    res.json(status<Array<WordType>>(filterWords, 1, ''))
+  } catch (err) {
+    res.status(500).json(status<null>(null, 0, err))
+  }
+})

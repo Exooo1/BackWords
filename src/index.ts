@@ -7,18 +7,19 @@ import { auth } from './Auth/auth'
 import { words } from './Words/words'
 import cron from 'node-cron'
 import { authModel } from './Auth/authSchema'
+import { profile } from './Profile/profile'
 
 dotenv.config()
 const app = express()
 app.use(express.json())
 app.use(cors())
 app.use(auth)
+app.use(profile)
 app.use(words)
 
 cron.schedule('*/20 * * * *', async () => {
   await authModel.deleteMany({ verify: 0 })
 })
-
 const start = async () => {
   try {
     await mongoose.connect(process.env.DB_URL)

@@ -116,16 +116,9 @@ words.post(
 
 words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType, res) => {
   try {
-    const profile = (await authModel.findOne({ _id: req.userId })) as AccountType
+    const profile = await authModel.findOne({ _id: req.userId }) as AccountType
     if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
-    let array: Array<WordType> = []
-    const values = Object.values(profile.profile.words) as Array<Array<WordType>>
-    for (let i = 0; i < values.length; i++) {
-      if (values[i].length > 0) {
-        array = [...array, ...values[i]]
-      }
-    }
-    const filterWords = array.filter((item) =>
+    const filterWords = profile.profile.words[req.query.word[0].toLowerCase()].filter((item) =>
       item.word.includes(req.query.word[0].toUpperCase() + req.query.word.slice(1)),
     )
     res.json(status<Array<WordType>>(filterWords, 1, ''))

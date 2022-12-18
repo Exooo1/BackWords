@@ -1,5 +1,5 @@
 import express from 'express'
-import {Response} from 'express/ts4.0'
+import {Request, Response} from 'express/ts4.0'
 import {userIType} from '../configIndex'
 import {authModel} from '../Auth/authSchema'
 import {
@@ -11,6 +11,7 @@ import {
     StatusType,
     WordType,
 } from '../Common/configAccount'
+import fs from "fs";
 
 export const words = express()
 
@@ -126,7 +127,7 @@ words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType,
         res.status(500).json(status<null>(null, 0, err))
     }
 })
-words.post('/sort-words', async (req: ReqBodyType<{ sort: boolean, sortType: 'ADDED' | 'DESCRIP' }> & userIType, res) => {
+words.post('/sort-words', async (req: ReqBodyType<{ sort: boolean, sortType: 'ADDED' | 'DESCRIPTION' }> & userIType, res) => {
     try {
         const profile = (await authModel.findOne({_id: req.userId})) as AccountType
         if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
@@ -144,11 +145,39 @@ words.post('/sort-words', async (req: ReqBodyType<{ sort: boolean, sortType: 'AD
                     ? array.sort((a, b) => new Date(a.added).valueOf() - new Date(b.added).valueOf())
                     : array.sort((a, b) => new Date(b.added).valueOf() - new Date(a.added).valueOf())
                 break;
-            case "DESCRIP":
+            case "DESCRIPTION":
                 sort = array.filter(item => item.description.length >= 1)
                 break;
         }
         res.json(status<Array<WordType>>(sort, 1, ''))
+    } catch (err) {
+        res.status(500).json(status<null>(null, 0, err))
+    }
+})
+
+words.get('/words-download', async (req: Request & userIType, res) => {
+    let count = 0
+    try {
+        const profile = (await authModel.findOne({_id: req.userId})) as AccountType
+        if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
+        const array: Array<WordType> = []
+        const values = Object.values(profile.profile.words) as Array<Array<WordType>>
+        for (let i = 0; i < values.length; i++) {
+            if (values[i].length > 0) {
+                array.push(...values[i])
+            }
+        }
+        fs.unlink('src/words.txt', (err) => {
+
+        })
+        fs.appendFileSync('src/words.txt', ``)
+        array.map((item) => {
+            count++
+            fs.appendFileSync('src/words.txt', `${count}. ${item.word} - ${item.translate}\n`);
+        })
+        fs.readFile('src/words.txt', 'utf8', (err, data) => {
+            res.send(data)
+        });
     } catch (err) {
         res.status(500).json(status<null>(null, 0, err))
     }

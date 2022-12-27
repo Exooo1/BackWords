@@ -11,7 +11,8 @@ import {
     StatusType,
     WordType,
 } from '../Common/configAccount'
-import fs from "fs";
+import fs from 'fs'
+
 
 export const words = express()
 
@@ -67,7 +68,7 @@ words.post(
                         words.profile.words[word[0].toLowerCase()][0],
                         1,
                         '',
-                        `You added word '${word}' ${new Date().toTimeString().split(' ')[0]}`,
+                        `You added word @${word} ${new Date().toTimeString().split(' ')[0]}`,
                     ),
                 )
         } catch (err) {
@@ -79,7 +80,7 @@ words.delete(
     '/delete-word',
     async (
         req: ReqQueryType<{ id: string; letter: string }> & userIType,
-        res: Response<StatusType<null>>,
+        res: Response<StatusType<string>>,
     ) => {
         try {
             const {id, letter} = req.query
@@ -87,7 +88,7 @@ words.delete(
             person.profile.words[letter].pull({_id: id})
             person.profile.totalWords -= 1
             await person.save()
-            res.json(status<null>(null, 1, '', 'Deleted'))
+            res.json(status<string>('You removed word', 1, '', 'Deleted'))
         } catch (err) {
             res.status(500).json(status<null>(null, 0, err))
         }
@@ -98,7 +99,7 @@ words.post(
     async (
         req: ReqBodyType<{ word: string; translate: string; description: string; id: String }> &
             userIType,
-        res: Response<StatusType<null>>,
+        res: Response<StatusType<string>>,
     ) => {
         try {
             const {word, translate, description, id} = req.body
@@ -108,7 +109,7 @@ words.post(
             person.profile.words[word[0].toLowerCase()][result].translate = translate
             person.profile.words[word[0].toLowerCase()][result].description = description
             await person.save()
-            res.status(200).json(status<null>(null, 1, '', `You changed this word ${word}`))
+            res.status(200).json(status<string>(`You changed word @${word}`, 1, '', ``))
         } catch (err) {
             res.status(500).json(status<null>(null, 0, err))
         }
@@ -127,33 +128,39 @@ words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType,
         res.status(500).json(status<null>(null, 0, err))
     }
 })
-words.post('/sort-words', async (req: ReqBodyType<{ sort: boolean, sortType: 'ADDED' | 'DESCRIPTION' }> & userIType, res) => {
-    try {
-        const profile = (await authModel.findOne({_id: req.userId})) as AccountType
-        if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
-        const array: Array<WordType> = []
-        const values = Object.values(profile.profile.words) as Array<Array<WordType>>
-        for (let i = 0; i < values.length; i++) {
-            if (values[i].length > 0) {
-                array.push(...values[i])
+words.post(
+    '/sort-words',
+    async (
+        req: ReqBodyType<{ isSort: boolean; sortType: 'ADDED' | 'DESCRIPTION' }> & userIType,
+        res,
+    ) => {
+        try {
+            const profile = (await authModel.findOne({_id: req.userId})) as AccountType
+            if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
+            const array: Array<WordType> = []
+            const values = Object.values(profile.profile.words) as Array<Array<WordType>>
+            for (let i = 0; i < values.length; i++) {
+                if (values[i].length > 0) {
+                    array.push(...values[i])
+                }
             }
+            let sort
+            switch (req.body.sortType) {
+                case 'ADDED':
+                    sort = req.body.isSort
+                        ? array.sort((a, b) => new Date(a.added).valueOf() - new Date(b.added).valueOf())
+                        : array.sort((a, b) => new Date(b.added).valueOf() - new Date(a.added).valueOf())
+                    break
+                case 'DESCRIPTION':
+                    sort = array.filter((item) => item.description.length >= 1)
+                    break
+            }
+            res.json(status<Array<WordType>>(sort, 1, ''))
+        } catch (err) {
+            res.status(500).json(status<null>(null, 0, err))
         }
-        let sort;
-        switch (req.body.sortType) {
-            case "ADDED":
-                sort = req.body.sort
-                    ? array.sort((a, b) => new Date(a.added).valueOf() - new Date(b.added).valueOf())
-                    : array.sort((a, b) => new Date(b.added).valueOf() - new Date(a.added).valueOf())
-                break;
-            case "DESCRIPTION":
-                sort = array.filter(item => item.description.length >= 1)
-                break;
-        }
-        res.json(status<Array<WordType>>(sort, 1, ''))
-    } catch (err) {
-        res.status(500).json(status<null>(null, 0, err))
-    }
-})
+    },
+)
 
 words.get('/words-download', async (req: Request & userIType, res) => {
     let count = 0
@@ -168,16 +175,15 @@ words.get('/words-download', async (req: Request & userIType, res) => {
             }
         }
         fs.unlink('src/words.txt', (err) => {
-
         })
         fs.appendFileSync('src/words.txt', ``)
         array.map((item) => {
             count++
-            fs.appendFileSync('src/words.txt', `${count}. ${item.word} - ${item.translate}\n`);
+            fs.appendFileSync('src/words.txt', `${count}. ${item.word} - ${item.translate}\n`)
         })
         fs.readFile('src/words.txt', 'utf8', (err, data) => {
             res.send(data)
-        });
+        })
     } catch (err) {
         res.status(500).json(status<null>(null, 0, err))
     }

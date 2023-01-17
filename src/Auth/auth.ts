@@ -13,7 +13,6 @@ import {
 } from '../Common/configAccount'
 import nodemailer from 'nodemailer'
 import { createHandlebars } from '../HTML/configSendEmail'
-import fs from 'fs'
 
 export const auth = Route()
 const jwt = jsonToken

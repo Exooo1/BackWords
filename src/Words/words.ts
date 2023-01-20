@@ -162,7 +162,6 @@ words.post(
 )
 
 words.get('/words-download', async (req: Request & userIType, res) => {
-    let count = 0
     try {
         const profile = (await authModel.findOne({_id: req.userId})) as AccountType
         if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
@@ -173,16 +172,12 @@ words.get('/words-download', async (req: Request & userIType, res) => {
                 array.push(...values[i])
             }
         }
-        fs.unlink('src/words.txt', (err) => {
-        })
-        fs.appendFileSync('src/words.txt', ``)
-        array.map((item) => {
-            count++
-            fs.appendFileSync('src/words.txt', `${count}. ${item.word} - ${item.translate}\n`)
-        })
-        fs.readFile('src/words.txt', 'utf8', (err, data) => {
-            res.send(data)
-        })
+        fs.unlink('src/words.txt', (err) => console.log(err))
+        const result = array.map((item, index) => {
+            return `${index + 1}. ${item.word} - ${item.translate}\n`
+        }).join('')
+        fs.appendFileSync('src/words.txt', result)
+        if (result.length >= 1) res.status(200).send(result)
     } catch (err) {
         res.status(500).json(status<null>(null, 0, err))
     }

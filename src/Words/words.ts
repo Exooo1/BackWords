@@ -115,7 +115,6 @@ words.post(
         }
     },
 )
-
 words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType, res) => {
     try {
         const profile = (await authModel.findOne({_id: req.userId})) as AccountType

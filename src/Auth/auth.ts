@@ -67,45 +67,33 @@ auth.post(
 
 auth.post(
     '/auth/email',
-    (
+    async (
         req: ReqBodyType<{ email: string; name: string; verify: string }>,
         res: Response<StatusType<null>>,
     ) => {
-        const {email, name, verify} = req.body
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.USER,
-                pass: process.env.PASS,
-            },
-        })
-
-        const mailOptions = {
-            from: `YourVocabularyApp`,
-            to: `${email}`,
-            subject: 'Authorization in YourVocabulary',
-            html: createHandlebars({username: name, verify}),
-        }
         try {
-            transporter.sendMail(mailOptions)
+            const {email, name, verify} = req.body
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.USER,
+                    pass: process.env.PASS,
+                },
+            })
+
+            const mailOptions = {
+                from: `YourVocabularyApp`,
+                to: `${email}`,
+                subject: 'Authorization in YourVocabulary',
+                html: createHandlebars({username: name, verify}),
+            }
+            await transporter.sendMail(mailOptions)
+            res.json(status<null>(null, 1, '', 'Message was sent.'))
         } catch (err) {
-            res.status(500).json(status<null>(null, 1, err))
+            res.status(500).json(status<null>(null, 0, 'Error sending email'))
         }
-        res.json(status<null>(null, 1, '', 'Message was sent.'))
     },
 )
-auth.use((req: Request & userIDType, res: Response, next: NextFunction) => {
-    try {
-        const token = req.headers.authorization.split(' ')[1]
-        if (!token) res.status(404).json(status<number>(0, 0, 'notFound Token'))
-        const decor = jwt.verify(token, secretJWT) as AccountType
-        req.userId = decor._id
-        next()
-    } catch (err) {
-        res.json(status<null>(null, 0, ''))
-    }
-})
-
 auth.post(
     '/auth/confirm',
     async (req: ReqBodyType<{ id: string }>, res: Response<StatusType<null>>) => {
@@ -120,6 +108,19 @@ auth.post(
         }
     },
 )
+auth.use((req: Request & userIDType, res: Response, next: NextFunction) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1]
+        console.log(req.headers.authorization.split(' ')[1])
+        if (!token) res.status(404).json(status<number>(0, 0, 'notFound Token'))
+        const decor = jwt.verify(token, secretJWT) as AccountType
+        req.userId = decor._id
+        next()
+    } catch (err) {
+        res.json(status<null>(null, 0, ''))
+    }
+})
+
 
 auth.get('/auth/me', async (req: Request & userIDType, res: Response<StatusType<number>>) => {
     try {

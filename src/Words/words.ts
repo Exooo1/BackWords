@@ -1,6 +1,6 @@
 import express from 'express'
 import {Request, Response} from 'express/ts4.0'
-import {userIType} from '../configIndex'
+import {userIDType} from '../configIndex'
 import {authModel} from '../Auth/authSchema'
 import {
     AccountType,
@@ -19,7 +19,7 @@ export const words = express()
 words.get(
     '/words',
     async (
-        req: ReqQueryType<{ count: number }> & userIType,
+        req: ReqQueryType<{ count: number }> & userIDType,
         res: Response<StatusType<ProfileAccountType>>,
     ) => {
         try {
@@ -49,7 +49,7 @@ words.get(
 
 words.post(
     '/add-word',
-    async (req: ReqBodyType<{ word: string }> & userIType, res: Response<StatusType<string>>) => {
+    async (req: ReqBodyType<{ word: string }> & userIDType, res: Response<StatusType<string>>) => {
         try {
             const {word} = req.body
             const words = (await authModel.findOne({_id: req.userId})) as AccountType
@@ -79,7 +79,7 @@ words.post(
 words.delete(
     '/delete-word',
     async (
-        req: ReqQueryType<{ id: string; letter: string }> & userIType,
+        req: ReqQueryType<{ id: string; letter: string }> & userIDType,
         res: Response<StatusType<string>>,
     ) => {
         try {
@@ -98,7 +98,7 @@ words.post(
     '/word-change',
     async (
         req: ReqBodyType<{ word: string; translate: string; description: string; id: String }> &
-            userIType,
+            userIDType,
         res: Response<StatusType<string>>,
     ) => {
         try {
@@ -115,7 +115,7 @@ words.post(
         }
     },
 )
-words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType, res) => {
+words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIDType, res) => {
     try {
         const profile = (await authModel.findOne({_id: req.userId})) as AccountType
         if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))
@@ -130,7 +130,7 @@ words.post('/word-find', async (req: ReqQueryType<{ word: string }> & userIType,
 words.post(
     '/sort-words',
     async (
-        req: ReqBodyType<{ isSort: boolean; sortType: 'ADDED' | 'DESCRIPTION' }> & userIType,
+        req: ReqBodyType<{ isSort: boolean; sortType: 'ADDED' | 'DESCRIPTION' }> & userIDType,
         res,
     ) => {
         try {
@@ -161,7 +161,7 @@ words.post(
     },
 )
 
-words.get('/words-download', async (req: Request & userIType, res) => {
+words.get('/words-download', async (req: Request & userIDType, res) => {
     try {
         const profile = (await authModel.findOne({_id: req.userId})) as AccountType
         if (!profile) return res.status(404).json(status<null>(null, 0, 'NotFound'))

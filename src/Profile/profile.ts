@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express'
 import { authModel } from '../Auth/authSchema'
-import { userIType } from '../configIndex'
+import { userIDType } from '../configIndex'
 import { AccountType, status } from '../Common/configAccount'
 
 export const profile = express()
 
-profile.get('/profile/fullname', async (req: Request & userIType, res: Response) => {
+profile.get('/profile/fullname', async (req: Request & userIDType, res: Response) => {
   try {
     const person = (await authModel.findOne({ _id: req.userId })) as AccountType
     res.json(status<{ firstName: string; lastName: string }>(person.profile, 1, ''))

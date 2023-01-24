@@ -51,12 +51,12 @@ auth.post(
     ) => {
         try {
             const {email, password} = req.body
-            const person = (await authModel.findOne({email})) as AccountType
-            if (!person) return res.status(404).json(status<null>(null, 0, "You aren't authorized!"))
-            const validPass = bcrypt.compareSync(password, person.password)
-            if (!validPass) res.status(404).json(status<null>(null, 0, 'Incorrect password or email'))
-            const token = jwt.sign({_id: person._id}, secretJWT, {expiresIn: '15d'})
-            if (!person.verify) return res.status(400).json(status<null>(null, 0, 'Confirm your Email'))
+            const account = await returnEmailAccount({value: email})
+            if (!account) return res.status(404).json(status<null>(null, 0, "You aren't authorized!"))
+            const validPass = bcrypt.compareSync(password, account.password)
+            if (!validPass) res.status(404).json(status<null>(null, 0, 'Email or password is incorrect'))
+            if (!account.verify) return res.status(400).json(status<null>(null, 0, 'Please confirm your email'))
+            const token = jwt.sign({_id: account._id}, secretJWT, {expiresIn: '15d'})
             await authModel.updateOne({email}, {auth: 1})
             res.json(status<AuthTokenType>({token: token, auth: 1}, 1, ''))
         } catch (err) {

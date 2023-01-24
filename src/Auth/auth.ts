@@ -96,13 +96,14 @@ auth.post(
 )
 auth.post(
     '/auth/confirm',
-    async (req: ReqBodyType<{ id: string }>, res: Response<StatusType<null>>) => {
+    async (req: ReqBodyType<{ id: string }>, res: Response<StatusType<string>>) => {
         try {
             const {id} = req.body
             const account = await authModel.findOne({_id: id})
             if (!account) return res.status(404).json(status<null>(null, 0, 'NotFound'))
+            if (account.verify === 1) return res.status(400).json(status<null>(null, 0, 'Account already verified'));
             await authModel.updateOne({_id: id}, {verify: 1})
-            res.status(200).json(status<null>(null, 1, '', 'Congrats! You confirmed your Email'))
+            res.status(200).json(status<string>('Email confirmed successfully', 1, ''))
         } catch (err) {
             res.status(500).json(status<null>(null, 0, err))
         }

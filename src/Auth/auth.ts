@@ -51,6 +51,7 @@ auth.post(
   ) => {
     try {
       const { email, password } = req.body
+      console.log(email,password)
       const account = await returnEmailAccount({ value: email })
       if (!account) return res.status(404).json(status<null>(null, 0, "You aren't authorized!"))
       const validPass = bcrypt.compareSync(password, account.password)

@@ -3,12 +3,12 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import {auth} from './Auth/auth'
-import {words} from './Words/words'
 import cron from 'node-cron'
 import {authModel} from './Auth/authSchema'
-import {profile} from './Profile/profile'
 import {server} from "./chat/chat";
+import  auth from "./Auth/authRouter";
+import word from './Words/routerWords'
+import profile from './Profile/profileRouter'
 
 dotenv.config()
 const app = express()
@@ -16,7 +16,7 @@ app.use(express.json())
 app.use(cors())
 app.use(auth)
 app.use(profile)
-app.use(words)
+app.use(word)
 
 cron.schedule('*/20 * * * *', async () => {
     await authModel.deleteMany({verify: 0})
